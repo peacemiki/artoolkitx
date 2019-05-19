@@ -496,7 +496,7 @@ public class ARController {
      * @return true if successful
      */
     public boolean drawVideoInit(int videoSourceIndex){
-        return ARX_jni.arwDrawVideoInit(videoSourceIndex);
+        return ARX_jni.arwDrawVideoInit(0);
     }
 
     /**
@@ -506,7 +506,7 @@ public class ARController {
      * @return true if successful
      */
     public boolean drawVideoSettings(int videoSourceIndex, int width, int height, boolean rotate90, boolean flipH, boolean flipV, int hAlign, int vAlign, int scalingMode, int[] viewport) {
-        return ARX_jni.arwDrawVideoSettings(videoSourceIndex, width, height, rotate90, flipH, flipV, hAlign, vAlign, scalingMode, viewport);
+        return ARX_jni.arwDrawVideoSettings(0, width, height, rotate90, flipH, flipV, hAlign, vAlign, scalingMode, viewport);
     }
     
     /**
@@ -517,7 +517,7 @@ public class ARController {
      */
     @SuppressWarnings("WeakerAccess")
     public boolean drawVideoSettings(int videoSourceIndex) {
-        return ARX_jni.arwDrawVideo(videoSourceIndex);
+        return ARX_jni.arwDrawVideo(0);
     }
     
     /**
@@ -528,6 +528,6 @@ public class ARController {
      */
     @SuppressWarnings("WeakerAccess")
     public boolean drawVideoFinal(int videoSourceIndex) {
-        return ARX_jni.arwDrawVideoFinal(videoSourceIndex);
+        return ARX_jni.arwDrawVideoFinal(0);
     }
 }
