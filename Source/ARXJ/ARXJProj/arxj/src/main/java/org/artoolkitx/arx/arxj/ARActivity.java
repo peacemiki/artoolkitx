@@ -131,7 +131,6 @@ public abstract class ARActivity extends /*AppCompat*/Activity implements View.O
         // This locks the orientation. Hereafter, any API returning display orientation data will
         // return the data representing this orientation no matter the current position of the
         // device.
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         AndroidUtils.reportDisplayInformation(this);
