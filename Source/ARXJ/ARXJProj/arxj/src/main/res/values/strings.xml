@@ -11,10 +11,10 @@
     <string-array name="pref_entryValues_cameraResolution">
         <item>640x480</item>
     </string-array>
-    <string name="pref_defaultValue_cameraResolution">640x480</string>
+    <string name="pref_defaultValue_cameraResolution">960x540</string>
 
     <string name="pref_title_cameraIndex">Change camera</string>
-    <string name="pref_defaultValue_cameraIndex">0</string>
+    <string name="pref_defaultValue_cameraIndex">1</string>
 
     <string-array name="pref_entries_cameraIndex">
         <item>Rear camera</item>

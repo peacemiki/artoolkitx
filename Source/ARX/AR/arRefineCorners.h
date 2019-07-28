@@ -39,7 +39,7 @@
 
 #include <ARX/AR/ar.h>
 
-#if HAVE_OPENCV
+//#if HAVE_OPENCV
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,6 +53,6 @@ void arRefineCorners(float vertex[4][2], const unsigned char *buff, int width, i
 }
 #endif
 
-#endif // HAVE_OPENCV
+//#endif // HAVE_OPENCV
 
 #endif // AR_REFINE_CORNERS_H

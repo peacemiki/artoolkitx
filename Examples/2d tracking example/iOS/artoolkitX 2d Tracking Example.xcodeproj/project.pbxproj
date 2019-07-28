@@ -16,7 +16,6 @@
 		4A70A1041DC7F580005A4F69 /* ARViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 4A70A0EF1DC7F425005A4F69 /* ARViewController.mm */; };
 		4A70A10E1DC7F773005A4F69 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A70A10A1DC7F773005A4F69 /* LaunchScreen.storyboard */; };
 		4A70A10F1DC7F773005A4F69 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4A70A10C1DC7F773005A4F69 /* Main.storyboard */; };
-		4A70A1181DC7FAA6005A4F69 /* ARX in Resources */ = {isa = PBXBuildFile; fileRef = 4A70A1171DC7FAA6005A4F69 /* ARX */; };
 		4A70A11A1DC7FADC005A4F69 /* libARX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A70A1191DC7FADC005A4F69 /* libARX.a */; };
 		4A70A1231DC80645005A4F69 /* libcurl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A70A11F1DC80645005A4F69 /* libcurl.a */; };
 		4A70A1251DC80645005A4F69 /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4A70A1211DC80645005A4F69 /* libjpeg.a */; };
@@ -47,7 +46,6 @@
 		4A70A10B1DC7F773005A4F69 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4A70A10D1DC7F773005A4F69 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4A70A1101DC7F963005A4F69 /* draw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = draw.h; path = ../draw.h; sourceTree = "<group>"; };
-		4A70A1171DC7FAA6005A4F69 /* ARX */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ARX; sourceTree = "<group>"; };
 		4A70A1191DC7FADC005A4F69 /* libARX.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libARX.a; sourceTree = "<group>"; };
 		4A70A11F1DC80645005A4F69 /* libcurl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcurl.a; path = ../../../Source/depends/ios/lib/libcurl.a; sourceTree = "<group>"; };
 		4A70A1211DC80645005A4F69 /* libjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjpeg.a; path = ../../../Source/depends/ios/lib/libjpeg.a; sourceTree = "<group>"; };
@@ -138,18 +136,9 @@
 			isa = PBXGroup;
 			children = (
 				4A70A1161DC7FA83005A4F69 /* lib */,
-				4A70A1151DC7FA7C005A4F69 /* include */,
 			);
 			name = SDK;
 			path = ../../../SDK;
-			sourceTree = "<group>";
-		};
-		4A70A1151DC7FA7C005A4F69 /* include */ = {
-			isa = PBXGroup;
-			children = (
-				4A70A1171DC7FAA6005A4F69 /* ARX */,
-			);
-			path = include;
 			sourceTree = "<group>";
 		};
 		4A70A1161DC7FA83005A4F69 /* lib */ = {
@@ -218,7 +207,7 @@
 				TargetAttributes = {
 					4A70A0E01DC7F425005A4F69 = {
 						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = 7ER2WP8VB3;
+						DevelopmentTeam = M33J4ZUG54;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -246,7 +235,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4A70A1181DC7FAA6005A4F69 /* ARX in Resources */,
 				4A70A10F1DC7F773005A4F69 /* Main.storyboard in Resources */,
 				4A70A10E1DC7F773005A4F69 /* LaunchScreen.storyboard in Resources */,
 				4A70A0F51DC7F425005A4F69 /* Assets.xcassets in Resources */,
@@ -420,20 +408,22 @@
 		4A70A0FD1DC7F425005A4F69 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 7ER2WP8VB3;
+				DEVELOPMENT_TEAM = M33J4ZUG54;
 				HEADER_SEARCH_PATHS = (
 					"${inherited}",
 					"$(PROJECT_DIR)/include",
 				);
 				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
 					"$(PROJECT_DIR)/lib",
+					"${inherited}",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.artoolkitx.arx.2d-tracking-example-ios";
+				PRODUCT_BUNDLE_IDENTIFIER = com.jaemicci.mhc;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -443,20 +433,22 @@
 		4A70A0FE1DC7F425005A4F69 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 7ER2WP8VB3;
+				DEVELOPMENT_TEAM = M33J4ZUG54;
 				HEADER_SEARCH_PATHS = (
 					"${inherited}",
 					"$(PROJECT_DIR)/include",
 				);
 				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
 					"$(PROJECT_DIR)/lib",
+					"${inherited}",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.artoolkitx.arx.2d-tracking-example-ios";
+				PRODUCT_BUNDLE_IDENTIFIER = com.jaemicci.mhc;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";

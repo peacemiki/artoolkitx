@@ -300,9 +300,9 @@ public abstract class ARActivity extends /*AppCompat*/Activity implements View.O
             if (grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                 notifyFinish("Application will not run with camera access denied");
             } else if (1 <= permissions.length) {
-                Toast.makeText(getApplicationContext(),
-                        String.format("Camera access permission \"%s\" allowed", permissions[0]),
-                        Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(),
+//                        String.format("Camera access permission \"%s\" allowed", permissions[0]),
+//                        Toast.LENGTH_SHORT).show();
             }
             Log.i(TAG, "onRequestPermissionsResult(): reset ask for cam access perm");
             mCameraAccessHandler.resetCameraAccessPermissionsFromUser();
