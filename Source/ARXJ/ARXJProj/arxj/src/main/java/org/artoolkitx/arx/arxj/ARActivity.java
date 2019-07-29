@@ -44,9 +44,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.graphics.PixelFormat;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLSurfaceView.Renderer;
 import android.os.Build;
@@ -62,7 +60,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import org.artoolkitx.arx.arxj.camera.CameraAccessHandler;
 import org.artoolkitx.arx.arxj.camera.CameraEventListener;
@@ -195,7 +192,7 @@ public abstract class ARActivity extends /*AppCompat*/Activity implements View.O
             mGlView.setRenderer(renderer);
         }
 
-        mGlView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY); // Only render when we have a frame (must call requestRender()).
+        mGlView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY); // Only render when we have a frame (must call requestRender()).
         mGlView.addOnLayoutChangeListener(new LayoutChangeListenerImpl(this, mCameraAccessHandler));
 
         Log.i(TAG, "onResume(): GLSurfaceView created");
@@ -211,10 +208,10 @@ public abstract class ARActivity extends /*AppCompat*/Activity implements View.O
         }
 
         //Load settings button
-        View settingsButtonLayout = this.getLayoutInflater().inflate(R.layout.settings, mainLayout, false);
-        mConfigButton = settingsButtonLayout.findViewById(R.id.button_config);
-        mainLayout.addView(settingsButtonLayout);
-        mConfigButton.setOnClickListener(this);
+//        View settingsButtonLayout = this.getLayoutInflater().inflate(R.layout.settings, mainLayout, false);
+//        mConfigButton = settingsButtonLayout.findViewById(R.id.button_config);
+//        mainLayout.addView(settingsButtonLayout);
+//        mConfigButton.setOnClickListener(this);
     }
 
     @Override
