@@ -61,7 +61,14 @@ import java.util.List;
  *  Author(s): Philip Lamb, Thorsten Bux, John Wolf
  *
  */
-class CameraSurfaceImpl implements CameraSurface {
+public class CameraSurfaceImpl implements CameraSurface {
+
+    public static boolean swap;
+    public static boolean xflip;
+    public static boolean yflip;
+
+    public static boolean useNV21 = false;
+    public static boolean useFlip = false;
 
     /**
      * Android logging tag for this class.
@@ -119,28 +126,198 @@ class CameraSurfaceImpl implements CameraSurface {
                 return;
             }
 
-            // Get a ByteBuffer for each plane.
-            final Image.Plane[] imagePlanes = imageInstance.getPlanes();
-            final int imagePlaneCount = Math.min(4, imagePlanes.length); // We can handle up to 4 planes max.
-            final ByteBuffer[] imageBuffers = new ByteBuffer[imagePlaneCount];
-            final int[] imageBufferPixelStrides = new int[imagePlaneCount];
-            final int[] imageBufferRowStrides = new int[imagePlaneCount];
-            for (int i = 0; i < imagePlaneCount; i++) {
-                imageBuffers[i] = imagePlanes[i].getBuffer();
-                // For ImageFormat.YUV_420_888 the order of planes in the array returned by Image.getPlanes()
-                // is guaranteed such that plane #0 is always Y, plane #1 is always U (Cb), and plane #2 is always V (Cr).
-                // The Y-plane is guaranteed not to be interleaved with the U/V planes (in particular, pixel stride is
-                // always 1 in yPlane.getPixelStride()). The U/V planes are guaranteed to have the same row stride and
-                // pixel stride (in particular, uPlane.getRowStride() == vPlane.getRowStride() and uPlane.getPixelStride() == vPlane.getPixelStride(); ).
-                imageBufferPixelStrides[i] = imagePlanes[i].getPixelStride();
-                imageBufferRowStrides[i] = imagePlanes[i].getRowStride();
-            }
+            if (useNV21) {
+                if (mCameraEventListener != null) {
+                    byte[] goal = YUV_420_888toNV21(imageInstance);
+                    if (useFlip) {
+                        goal = rotateNV21_working(goal, imageInstance.getWidth(), imageInstance.getHeight(), 180);
+                    }
+                    mCameraEventListener.cameraStreamFrame(goal, goal.length);
+                }
+            } else {
+                // Get a ByteBuffer for each plane.
+                final Image.Plane[] imagePlanes = imageInstance.getPlanes();
+                final int imagePlaneCount = Math.min(4, imagePlanes.length); // We can handle up to 4 planes max.
+                final ByteBuffer[] imageBuffers = new ByteBuffer[imagePlaneCount];
+                final int[] imageBufferPixelStrides = new int[imagePlaneCount];
+                final int[] imageBufferRowStrides = new int[imagePlaneCount];
+                for (int i = 0; i < imagePlaneCount; i++) {
+                    imageBuffers[i] = imagePlanes[i].getBuffer();
+                    // For ImageFormat.YUV_420_888 the order of planes in the array returned by Image.getPlanes()
+                    // is guaranteed such that plane #0 is always Y, plane #1 is always U (Cb), and plane #2 is always V (Cr).
+                    // The Y-plane is guaranteed not to be interleaved with the U/V planes (in particular, pixel stride is
+                    // always 1 in yPlane.getPixelStride()). The U/V planes are guaranteed to have the same row stride and
+                    // pixel stride (in particular, uPlane.getRowStride() == vPlane.getRowStride() and uPlane.getPixelStride() == vPlane.getPixelStride(); ).
+                    imageBufferPixelStrides[i] = imagePlanes[i].getPixelStride();
+                    imageBufferRowStrides[i] = imagePlanes[i].getRowStride();
+                }
 
-            if (mCameraEventListener != null) {
-                mCameraEventListener.cameraStreamFrame(imageBuffers, imageBufferPixelStrides, imageBufferRowStrides);
+                if (mCameraEventListener != null) {
+                    mCameraEventListener.cameraStreamFrame(imageBuffers, imageBufferPixelStrides, imageBufferRowStrides);
+                }
             }
 
             imageInstance.close();
+        }
+
+        private byte[] rotateNV21_working(final byte[] yuv,
+                                                final int width,
+                                                final int height,
+                                                final int rotation)
+        {
+            if (rotation == 0) return yuv;
+            if (rotation % 90 != 0 || rotation < 0 || rotation > 270) {
+                throw new IllegalArgumentException("0 <= rotation < 360, rotation % 90 == 0");
+            }
+
+            final byte[]  output    = new byte[yuv.length];
+            final int     frameSize = width * height;
+//            final boolean swap      = false;//rotation % 180 != 0;
+//            final boolean xflip     = true;//rotation % 270 != 0;
+//            final boolean yflip     = false;//rotation >= 180;
+
+            for (int j = 0; j < height; j++) {
+                for (int i = 0; i < width; i++) {
+                    final int yIn = j * width + i;
+                    final int uIn = frameSize + (j >> 1) * width + (i & ~1);
+                    final int vIn = uIn       + 1;
+
+                    final int wOut     = swap  ? height              : width;
+                    final int hOut     = swap  ? width               : height;
+                    final int iSwapped = swap  ? j                   : i;
+                    final int jSwapped = swap  ? i                   : j;
+                    final int iOut     = xflip ? wOut - iSwapped - 1 : iSwapped;
+                    final int jOut     = yflip ? hOut - jSwapped - 1 : jSwapped;
+
+                    final int yOut = jOut * wOut + iOut;
+                    final int uOut = frameSize + (jOut >> 1) * wOut + (iOut & ~1);
+                    final int vOut = uOut + 1;
+
+                    output[yOut] = (byte)(0xff & yuv[yIn]);
+                    output[uOut] = (byte)(0xff & yuv[uIn]);
+                    output[vOut] = (byte)(0xff & yuv[vIn]);
+                }
+            }
+            return output;
+        }
+
+        private byte[] v4lconvert_vflip_yuv420(byte[] yuv, int width, int height)
+        {
+            int x, y;
+            byte[] flipped = new byte[yuv.length];
+
+            /* First flip the Y plane */
+            for (y = 0; y < height; y++) {
+                for (x = 0; x < width; x++) {
+                    flipped[height * (height - y) + x] = yuv[height * y + x];
+                }
+            }
+
+            /* Now flip the U plane */
+            int baseU = width * height;
+            int uvHeight = height/2;
+            int uvWidth = width/2;
+            for (y = 0; y < uvHeight; y++) {
+                for (x = 0; x < uvWidth; x++) {
+                    flipped[baseU + uvHeight * (uvHeight - y) + x] = yuv[baseU + uvHeight * y + x];
+                }
+            }
+
+            /* Last flip the V plane */
+            int baseV = width * height + uvHeight * uvWidth;
+            for (y = 0; y < uvHeight; y++) {
+                for (x = 0; x < uvWidth; x++) {
+                    flipped[baseV + uvHeight * (uvHeight - y) + x] = yuv[baseV + uvHeight * y + x];
+                }
+            }
+
+            return flipped;
+        }
+
+        private byte[] rotateYUV420Degree180(byte[] data, int imageWidth, int imageHeight) {
+            byte[] yuv = new byte[imageWidth * imageHeight * 3 / 2];
+            int i = 0;
+            int count = 0;
+            for (i = imageWidth * imageHeight - 1; i >= 0; i--) {
+                yuv[count] = data[i];
+                count++;
+            }
+            i = imageWidth * imageHeight * 3 / 2 - 1;
+            for (i = imageWidth * imageHeight * 3 / 2 - 1; i >= imageWidth
+                    * imageHeight; i -= 2) {
+                yuv[count++] = data[i - 1];
+                yuv[count++] = data[i];
+            }
+            return yuv;
+        }
+
+        private byte[] YUV_420_888toNV21(Image image) {
+
+            int width = image.getWidth();
+            int height = image.getHeight();
+            int ySize = width*height;
+            int uvSize = width*height/4;
+
+            byte[] nv21 = new byte[ySize + uvSize*2];
+
+            ByteBuffer yBuffer = image.getPlanes()[0].getBuffer(); // Y
+            ByteBuffer uBuffer = image.getPlanes()[1].getBuffer(); // U
+            ByteBuffer vBuffer = image.getPlanes()[2].getBuffer(); // V
+
+            int rowStride = image.getPlanes()[0].getRowStride();
+            assert(image.getPlanes()[0].getPixelStride() == 1);
+
+            int pos = 0;
+
+            if (rowStride == width) { // likely
+                yBuffer.get(nv21, 0, ySize);
+                pos += ySize;
+            }
+            else {
+                int yBufferPos = width - rowStride; // not an actual position
+                for (; pos<ySize; pos+=width) {
+                    yBufferPos += rowStride - width;
+                    yBuffer.position(yBufferPos);
+                    yBuffer.get(nv21, pos, width);
+                }
+            }
+
+            rowStride = image.getPlanes()[2].getRowStride();
+            int pixelStride = image.getPlanes()[2].getPixelStride();
+
+            assert(rowStride == image.getPlanes()[1].getRowStride());
+            assert(pixelStride == image.getPlanes()[1].getPixelStride());
+
+            if (pixelStride == 2 && rowStride == width && uBuffer.get(0) == vBuffer.get(1)) {
+                // maybe V an U planes overlap as per NV21, which means vBuffer[1] is alias of uBuffer[0]
+                byte savePixel = vBuffer.get(1);
+                vBuffer.put(1, (byte)0);
+                if (uBuffer.get(0) == 0) {
+                    vBuffer.put(1, (byte)255);
+                    if (uBuffer.get(0) == 255) {
+                        vBuffer.put(1, savePixel);
+                        vBuffer.get(nv21, ySize, uvSize);
+
+                        return nv21; // shortcut
+                    }
+                }
+
+                // unfortunately, the check failed. We must save U and V pixel by pixel
+                vBuffer.put(1, savePixel);
+            }
+
+            // other optimizations could check if (pixelStride == 1) or (pixelStride == 2),
+            // but performance gain would be less significant
+
+            for (int row=0; row<height/2; row++) {
+                for (int col=0; col<width/2; col++) {
+                    int vuPos = col*pixelStride + row*rowStride;
+                    nv21[pos++] = vBuffer.get(vuPos);
+                    nv21[pos++] = uBuffer.get(vuPos);
+                }
+            }
+
+            return nv21;
         }
     };
 
@@ -249,7 +426,7 @@ class CameraSurfaceImpl implements CameraSurface {
                         public void onConfigured(@NonNull CameraCaptureSession session) {
                             try {
                                 if (mCameraEventListener != null) {
-                                    mCameraEventListener.cameraStreamStarted(mImageReaderVideoSize.getWidth(), mImageReaderVideoSize.getHeight(), "YUV_420_888", mCamera2DeviceID, false);
+                                    mCameraEventListener.cameraStreamStarted(mImageReaderVideoSize.getWidth(), mImageReaderVideoSize.getHeight(), "NV21", mCamera2DeviceID, false);
                                 }
                                 mYUV_CaptureAndSendSession = session;
                                 // Session to repeat request to update passed in camSensorSurface
