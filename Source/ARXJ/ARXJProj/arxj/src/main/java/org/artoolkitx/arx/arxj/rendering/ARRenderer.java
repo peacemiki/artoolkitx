@@ -146,4 +146,6 @@ public abstract class ARRenderer implements GLSurfaceView.Renderer {
     public void setCameraIndex(int cameraIndex) {
         this.cameraIndex = cameraIndex;
     }
+
+    public abstract void onFrameProcessed(long elapsedTime);
 }

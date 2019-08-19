@@ -82,8 +82,10 @@ public class CameraEventListenerImpl implements CameraEventListener {
             firstUpdate = false;
         }
 
+        long elapsedTime = System.currentTimeMillis();
         if (ARController.getInstance().convertAndDetect1(frame, frameSize)) {
-            frameListener.onFrameProcessed();
+            elapsedTime = System.currentTimeMillis() - elapsedTime;
+            frameListener.onFrameProcessed(elapsedTime);
         }
     }
 
@@ -94,8 +96,10 @@ public class CameraEventListenerImpl implements CameraEventListener {
             firstUpdate = false;
         }
 
+        long elapsedTime = System.currentTimeMillis();
         if (ARController.getInstance().convertAndDetect2(framePlanes, framePlanePixelStrides, framePlaneRowStrides)) {
-            frameListener.onFrameProcessed();
+            elapsedTime = System.currentTimeMillis() - elapsedTime;
+            frameListener.onFrameProcessed(elapsedTime);
         }
     }
 
