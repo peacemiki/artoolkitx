@@ -360,12 +360,12 @@ bail:
     return false;
 }
 
-bool ARTrackerSquare::update(AR2VideoBufferT *buff, std::vector<ARTrackable *>& trackables)
+long ARTrackerSquare::update(AR2VideoBufferT *buff, std::vector<ARTrackable *>& trackables)
 {
     return update(buff, NULL, trackables);
 }
 
-bool ARTrackerSquare::update(AR2VideoBufferT *buff0, AR2VideoBufferT *buff1, std::vector<ARTrackable *>& trackables)
+long ARTrackerSquare::update(AR2VideoBufferT *buff0, AR2VideoBufferT *buff1, std::vector<ARTrackable *>& trackables)
 {
     ARMarkerInfo *markerInfo0 = NULL;
     ARMarkerInfo *markerInfo1 = NULL;

@@ -39,6 +39,7 @@
  */
 
 #include <ARX/ARTracker2d.h>
+#include <time.h>
 
 #if HAVE_2D
 #include <ARX/ARTrackable2d.h>
@@ -142,18 +143,26 @@ bool ARTracker2d::isRunning()
     return m_running;
 }
 
-bool ARTracker2d::update(AR2VideoBufferT *buff, std::vector<ARTrackable *>& trackables)
+long ARTracker2d::update(AR2VideoBufferT *buff, std::vector<ARTrackable *>& trackables)
 {
     ARLOGd("ARX::ARTracker2d::update()\n");
     // Late loading of data now that we have image width and height.
     if (!m_2DTrackerDataLoaded) {
         if (!loadTwoDData(trackables)) {
             ARLOGe("Error loading 2D image tracker data.\n");
-            return false;
+            return -1;
         }
     }
-    
+
+    double start, end;
+    long result;
+    start = now_ms();
     m_2DTracker->ProcessFrameData(buff->buff);
+    end = now_ms();
+    result = (long)(end - start);
+
+    ARLOGi("analyse time : %ld.\n", result);
+
     // Loop through all loaded 2D targets and match against tracking results.
     m_2DTrackerDetectedImageCount = 0;
     for (std::vector<ARTrackable *>::iterator it = trackables.begin(); it != trackables.end(); ++it) {
@@ -175,10 +184,18 @@ bool ARTracker2d::update(AR2VideoBufferT *buff, std::vector<ARTrackable *>& trac
             }
         }
     }
-    return true;
+    return result;
 }
 
-bool ARTracker2d::update(AR2VideoBufferT *buff0, AR2VideoBufferT *buff1, std::vector<ARTrackable *>& trackables)
+double ARTracker2d::now_ms() {
+
+    struct timespec res;
+    clock_gettime(CLOCK_REALTIME, &res);
+    return 1000.0 * res.tv_sec + (double) res.tv_nsec / 1e6;
+
+}
+
+long ARTracker2d::update(AR2VideoBufferT *buff0, AR2VideoBufferT *buff1, std::vector<ARTrackable *>& trackables)
 {
     return update(buff0, trackables);
 }

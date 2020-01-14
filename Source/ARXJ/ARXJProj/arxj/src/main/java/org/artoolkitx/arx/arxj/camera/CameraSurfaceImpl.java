@@ -341,7 +341,11 @@ public class CameraSurfaceImpl implements CameraSurface {
         int defaultCameraValueId = mAppContext.getResources().getIdentifier("pref_defaultValue_cameraResolution","string",mAppContext.getPackageName());
         String camResolution = prefs.getString("pref_cameraResolution", mAppContext.getResources(). getString(defaultCameraValueId));
         String[] dims = camResolution.split("x", 2);
-        mImageReaderVideoSize =  new Size(Integer.parseInt(dims[0]),Integer.parseInt(dims[1]));
+        if (dims.length == 2) {
+            mImageReaderVideoSize = new Size(Integer.parseInt(dims[0]), Integer.parseInt(dims[1]));
+        } else {
+            mImageReaderVideoSize = new Size(960, 540);
+        }
 
         // Note that maxImages should be at least 2 for acquireLatestImage() to be any different than acquireNextImage() -
         // discarding all-but-the-newest Image requires temporarily acquiring two Images at once. Or more generally,

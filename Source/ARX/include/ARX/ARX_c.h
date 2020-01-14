@@ -225,7 +225,7 @@ extern "C" {
 	 * analysed. All loaded trackables are updated.
 	 * @return			true if successful, false if an error occurred
 	 */
-    ARX_EXTERN bool arwUpdateAR();
+    ARX_EXTERN long arwUpdateAR();
     
     // ----------------------------------------------------------------------------------------------------
 #pragma mark  Video stream retrieval and/or drawing.

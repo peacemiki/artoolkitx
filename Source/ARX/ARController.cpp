@@ -309,7 +309,7 @@ bool ARController::updateTextureRGBA32(const int videoSourceIndex, uint32_t *buf
     }
 }
 
-bool ARController::update()
+long ARController::update()
 {
     ARLOGd("ARX::ARController::update().\n");
     
@@ -317,14 +317,14 @@ bool ARController::update()
         if (state != WAITING_FOR_VIDEO) {
             // State is NOTHING_INITIALISED or BASE_INITIALISED.
             ARLOGe("Update called but not yet started.\n");
-            return false;
+            return -1;
 
         } else {
 
             // First check there is a video source and it's open.
             if (!m_videoSource0 || !m_videoSource0->isOpen() || (m_videoSourceIsStereo && (!m_videoSource1 || !m_videoSource1->isOpen()))) {
                 ARLOGe("No video source or video source is closed.\n");
-                return false;
+                return -1;
             }
 
             // Video source is open, check whether we're waiting for it to start running.
@@ -335,7 +335,7 @@ bool ARController::update()
                     ARLOGi("Waiting for video.\n");
                     stateWaitingMessageLogged = true;
                 }
-                return true;
+                return 0;
             }
 
             state = DETECTION_RUNNING;
@@ -346,14 +346,14 @@ bool ARController::update()
     AR2VideoBufferT *image0, *image1 = NULL;
     image0 = m_videoSource0->checkoutFrameIfNewerThan(m_updateFrameStamp0);
     if (!image0) {
-        return true;
+        return 0;
     }
     m_updateFrameStamp0 = image0->time;
     if (m_videoSourceIsStereo) {
         image1 = m_videoSource1->checkoutFrameIfNewerThan(m_updateFrameStamp1);
         if (!image1) {
             m_videoSource0->checkinFrame(); // If we didn't checkout this frame, but we already checked out a frame from one or more other video sources, check those back in.
-            return true;
+            return 0;
         }
         m_updateFrameStamp1 = image1->time;
     }
@@ -362,7 +362,7 @@ bool ARController::update()
     // Tracker updates.
     //
 
-    bool ret = true;
+    long ret = -1;
 
     if (doSquareMarkerDetection) {
         if (!m_squareTracker->isRunning()) {
@@ -386,10 +386,11 @@ bool ARController::update()
     if (doTwoDMarkerDetection) {
         if (!m_twoDTracker->isRunning()) {
             if (!m_videoSourceIsStereo) ret = m_twoDTracker->start(m_videoSource0->getCameraParameters(), m_videoSource0->getPixelFormat());
-            else ret = m_twoDTracker->start(m_videoSource0->getCameraParameters(), m_videoSource0->getPixelFormat(), m_videoSource1->getCameraParameters(), m_videoSource1->getPixelFormat(), m_transL2R);
-            if (!ret) goto done;
+            else if(!m_twoDTracker->start(m_videoSource0->getCameraParameters(), m_videoSource0->getPixelFormat(), m_videoSource1->getCameraParameters(), m_videoSource1->getPixelFormat(), m_transL2R)) {
+                goto done;
+            }
         }
-        m_twoDTracker->update(image0, image1, m_trackables);
+        ret = m_twoDTracker->update(image0, image1, m_trackables);
     }
 #endif
 done:

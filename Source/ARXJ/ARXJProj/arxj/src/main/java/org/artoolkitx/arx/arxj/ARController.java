@@ -314,18 +314,18 @@ public class ARController {
      * @param frame New video frame to process.
      * @return true if successful, otherwise false.
      */
-    public boolean convertAndDetect1(byte[] frame, int frameSize) {
+    public long convertAndDetect1(byte[] frame, int frameSize) {
 
         if ((!initedNative) || (frame == null)) {
-            return false;
+            return -1;
         }
 
         if (ARX_jni.arwAndroidVideoPush1(0, frame, frameSize) < 0) {
-            return false;
+            return -1;
         }
         //noinspection SimplifiableIfStatement
         if (!ARX_jni.arwCapture()) {
-            return false;
+            return -1;
         }
         return ARX_jni.arwUpdateAR();
     }
@@ -341,19 +341,19 @@ public class ARController {
      * @param framePlanes New video frame to process.
      * @return true if successful, otherwise false.
      */
-    public boolean convertAndDetect2(ByteBuffer[] framePlanes, int[] framePlanePixelStrides, int[] framePlaneRowStrides) {
+    public long convertAndDetect2(ByteBuffer[] framePlanes, int[] framePlanePixelStrides, int[] framePlaneRowStrides) {
 
         if ((!initedNative) || (framePlanes == null)) {
-            return false;
+            return -1;
         }
 
         //Convert
-        if (!convert(framePlanes, framePlanePixelStrides, framePlaneRowStrides)) return false;
+        if (!convert(framePlanes, framePlanePixelStrides, framePlaneRowStrides)) return -1;
 
         //Detect
         //noinspection SimplifiableIfStatement
         if (!ARX_jni.arwCapture()) {
-            return false;
+            return -1;
         }
         return ARX_jni.arwUpdateAR();
     }

@@ -262,9 +262,9 @@ bool arwCapture()
     return (gARTK->capture());
 }
 
-bool arwUpdateAR()
+long arwUpdateAR()
 {
-    if (!gARTK) return false;
+    if (!gARTK) return -1;
     return gARTK->update();
 }
 

@@ -82,10 +82,12 @@ public class CameraEventListenerImpl implements CameraEventListener {
             firstUpdate = false;
         }
 
-        long elapsedTime = System.currentTimeMillis();
-        if (ARController.getInstance().convertAndDetect1(frame, frameSize)) {
-            elapsedTime = System.currentTimeMillis() - elapsedTime;
-            frameListener.onFrameProcessed(elapsedTime);
+        long start = System.currentTimeMillis();
+        long analyseTime = ARController.getInstance().convertAndDetect1(frame, frameSize);
+        Log.i(TAG, "analyseTime1 : " + analyseTime);
+        if (analyseTime > -1) {
+            long total = System.currentTimeMillis() - start;
+            frameListener.onFrameProcessed(total, analyseTime);
         }
     }
 
@@ -96,10 +98,12 @@ public class CameraEventListenerImpl implements CameraEventListener {
             firstUpdate = false;
         }
 
-        long elapsedTime = System.currentTimeMillis();
-        if (ARController.getInstance().convertAndDetect2(framePlanes, framePlanePixelStrides, framePlaneRowStrides)) {
-            elapsedTime = System.currentTimeMillis() - elapsedTime;
-            frameListener.onFrameProcessed(elapsedTime);
+        long start = System.currentTimeMillis();
+        long analyseTime = ARController.getInstance().convertAndDetect2(framePlanes, framePlanePixelStrides, framePlaneRowStrides);
+        Log.i(TAG, "analyseTime2 : " + analyseTime);
+        if (analyseTime > -1) {
+            long total = System.currentTimeMillis() - start;
+            frameListener.onFrameProcessed(total, analyseTime);
         }
     }
 

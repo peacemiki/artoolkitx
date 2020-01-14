@@ -266,7 +266,7 @@ public class ARX_jni {
      *
      * @return true if no error occurred, otherwise false
      */
-    public static native boolean arwUpdateAR();
+    public static native long arwUpdateAR();
 
     public static native boolean arwUpdateTexture32(byte[] image);
   

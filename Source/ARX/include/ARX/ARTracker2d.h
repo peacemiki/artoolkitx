@@ -73,8 +73,8 @@ public:
     bool start(ARParamLT *paramLT, AR_PIXEL_FORMAT pixelFormat) override;
     bool start(ARParamLT *paramLT0, AR_PIXEL_FORMAT pixelFormat0, ARParamLT *paramLT1, AR_PIXEL_FORMAT pixelFormat1, const ARdouble transL2R[3][4]) override;
     bool isRunning() override;
-    bool update(AR2VideoBufferT *buff, std::vector<ARTrackable *>& trackables) override;
-    bool update(AR2VideoBufferT *buff0, AR2VideoBufferT *buff1, std::vector<ARTrackable *>& trackables) override;
+    long update(AR2VideoBufferT *buff, std::vector<ARTrackable *>& trackables) override;
+    long update(AR2VideoBufferT *buff0, AR2VideoBufferT *buff1, std::vector<ARTrackable *>& trackables) override;
     bool stop() override;
     void terminate() override;
     
@@ -100,6 +100,7 @@ private:
     bool m_running;
     bool unloadTwoDData();
     bool loadTwoDData(std::vector<ARTrackable *>& trackables);
+    double now_ms();
 };
 
 #endif // HAVE_2D

@@ -362,7 +362,7 @@ public:
      *
 	 * @return				true if update completed successfully, false if an error occurred
 	 */
-	bool update();
+	long update();
 
     /**
      * Populates the provided buffer with the current contents of the debug image.

@@ -72,14 +72,14 @@ public final class FrameListenerImpl implements FrameListener {
     }
 
     @Override
-    public void onFrameProcessed(long elapsedTime) {
+    public void onFrameProcessed(long totalTime, long analyseTime) {
         // Update the renderer as the frame has changed
         if (glSurfaceView != null) {
             glSurfaceView.requestRender();
         }
 
         if (renderer != null) {
-            renderer.onFrameProcessed(elapsedTime);
+            renderer.onFrameProcessed(totalTime, analyseTime);
         }
     }
 }
