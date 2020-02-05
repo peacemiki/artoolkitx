@@ -71,9 +71,9 @@ public class CameraAccessHandlerImpl implements CameraAccessHandler {
                          // Or no uses-permission CAMERA element is in the
                          // manifest file. Must explain to the end user why the app wants
                          // permissions to the camera devices.
-                         Toast.makeText(activity.getApplicationContext(),
-                                 "App requires access to camera to be granted",
-                                 Toast.LENGTH_SHORT).show();
+//                         Toast.makeText(activity.getApplicationContext(),
+//                                 "App requires access to camera to be granted",
+//                                 Toast.LENGTH_SHORT).show();
                      }
 
                      // Request permission from the user to access the camera.

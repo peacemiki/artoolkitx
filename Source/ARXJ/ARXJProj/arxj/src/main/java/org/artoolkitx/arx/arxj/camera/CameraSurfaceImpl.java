@@ -120,7 +120,7 @@ public class CameraSurfaceImpl implements CameraSurface {
         {
 
             Image imageInstance = reader.acquireLatestImage();
-            if (imageInstance == null) {
+            if (imageInstance == null || mImageReader == null) {
                 //Note: This seems to happen quite often.
                 Log.v(TAG, "onImageAvailable(): unable to acquire new image");
                 return;
@@ -442,7 +442,7 @@ public class CameraSurfaceImpl implements CameraSurface {
 
                         @Override
                         public void onConfigureFailed(@NonNull CameraCaptureSession session) {
-                            Toast.makeText(mAppContext, "Unable to setup camera sensor capture session", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(mAppContext, "Unable to setup camera sensor capture session", Toast.LENGTH_SHORT).show();
                         }
                     }, // Callback for capture session state updates
                     null); // Secondary thread message queue
@@ -453,6 +453,8 @@ public class CameraSurfaceImpl implements CameraSurface {
 
     @Override
     public void closeCameraDevice() {
+        Log.d(TAG, "closeCameraDevice");
+
         closeYUV_CaptureAndForwardSession();
         if (null != mCameraDevice) {
             mCameraDevice.close();
