@@ -71,7 +71,7 @@ public class CameraEventListenerImpl implements CameraEventListener {
             arActivity.finish();
         }
 
-//        Toast.makeText(arActivity, "Camera settings: " + width + "x" + height, Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "Camera settings: " + width + "x" + height);
         firstUpdate = true;
     }
 

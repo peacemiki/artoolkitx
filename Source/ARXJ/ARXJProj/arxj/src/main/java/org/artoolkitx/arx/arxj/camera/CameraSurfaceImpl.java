@@ -18,7 +18,6 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
-import android.widget.Toast;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -108,7 +107,7 @@ public class CameraSurfaceImpl implements CameraSurface {
      */
     private boolean mImageReaderCreated;
 
-    public CameraSurfaceImpl(CameraEventListener cameraEventListener, Context appContext){
+    public CameraSurfaceImpl(CameraEventListener cameraEventListener, Context appContext) {
         this.mCameraEventListener = cameraEventListener;
         this.mAppContext = appContext;
     }
@@ -116,8 +115,7 @@ public class CameraSurfaceImpl implements CameraSurface {
 
     private final ImageReader.OnImageAvailableListener mImageAvailableAndProcessHandler = new ImageReader.OnImageAvailableListener() {
         @Override
-        public void onImageAvailable(ImageReader reader)
-        {
+        public void onImageAvailable(ImageReader reader) {
 
             Image imageInstance = reader.acquireLatestImage();
             if (imageInstance == null || mImageReader == null) {
@@ -161,17 +159,16 @@ public class CameraSurfaceImpl implements CameraSurface {
         }
 
         private byte[] rotateNV21_working(final byte[] yuv,
-                                                final int width,
-                                                final int height,
-                                                final int rotation)
-        {
+                                          final int width,
+                                          final int height,
+                                          final int rotation) {
             if (rotation == 0) return yuv;
             if (rotation % 90 != 0 || rotation < 0 || rotation > 270) {
                 throw new IllegalArgumentException("0 <= rotation < 360, rotation % 90 == 0");
             }
 
-            final byte[]  output    = new byte[yuv.length];
-            final int     frameSize = width * height;
+            final byte[] output = new byte[yuv.length];
+            final int frameSize = width * height;
 //            final boolean swap      = false;//rotation % 180 != 0;
 //            final boolean xflip     = true;//rotation % 270 != 0;
 //            final boolean yflip     = false;//rotation >= 180;
@@ -180,29 +177,28 @@ public class CameraSurfaceImpl implements CameraSurface {
                 for (int i = 0; i < width; i++) {
                     final int yIn = j * width + i;
                     final int uIn = frameSize + (j >> 1) * width + (i & ~1);
-                    final int vIn = uIn       + 1;
+                    final int vIn = uIn + 1;
 
-                    final int wOut     = swap  ? height              : width;
-                    final int hOut     = swap  ? width               : height;
-                    final int iSwapped = swap  ? j                   : i;
-                    final int jSwapped = swap  ? i                   : j;
-                    final int iOut     = xflip ? wOut - iSwapped - 1 : iSwapped;
-                    final int jOut     = yflip ? hOut - jSwapped - 1 : jSwapped;
+                    final int wOut = swap ? height : width;
+                    final int hOut = swap ? width : height;
+                    final int iSwapped = swap ? j : i;
+                    final int jSwapped = swap ? i : j;
+                    final int iOut = xflip ? wOut - iSwapped - 1 : iSwapped;
+                    final int jOut = yflip ? hOut - jSwapped - 1 : jSwapped;
 
                     final int yOut = jOut * wOut + iOut;
                     final int uOut = frameSize + (jOut >> 1) * wOut + (iOut & ~1);
                     final int vOut = uOut + 1;
 
-                    output[yOut] = (byte)(0xff & yuv[yIn]);
-                    output[uOut] = (byte)(0xff & yuv[uIn]);
-                    output[vOut] = (byte)(0xff & yuv[vIn]);
+                    output[yOut] = (byte) (0xff & yuv[yIn]);
+                    output[uOut] = (byte) (0xff & yuv[uIn]);
+                    output[vOut] = (byte) (0xff & yuv[vIn]);
                 }
             }
             return output;
         }
 
-        private byte[] v4lconvert_vflip_yuv420(byte[] yuv, int width, int height)
-        {
+        private byte[] v4lconvert_vflip_yuv420(byte[] yuv, int width, int height) {
             int x, y;
             byte[] flipped = new byte[yuv.length];
 
@@ -215,8 +211,8 @@ public class CameraSurfaceImpl implements CameraSurface {
 
             /* Now flip the U plane */
             int baseU = width * height;
-            int uvHeight = height/2;
-            int uvWidth = width/2;
+            int uvHeight = height / 2;
+            int uvWidth = width / 2;
             for (y = 0; y < uvHeight; y++) {
                 for (x = 0; x < uvWidth; x++) {
                     flipped[baseU + uvHeight * (uvHeight - y) + x] = yuv[baseU + uvHeight * y + x];
@@ -255,27 +251,26 @@ public class CameraSurfaceImpl implements CameraSurface {
 
             int width = image.getWidth();
             int height = image.getHeight();
-            int ySize = width*height;
-            int uvSize = width*height/4;
+            int ySize = width * height;
+            int uvSize = width * height / 4;
 
-            byte[] nv21 = new byte[ySize + uvSize*2];
+            byte[] nv21 = new byte[ySize + uvSize * 2];
 
             ByteBuffer yBuffer = image.getPlanes()[0].getBuffer(); // Y
             ByteBuffer uBuffer = image.getPlanes()[1].getBuffer(); // U
             ByteBuffer vBuffer = image.getPlanes()[2].getBuffer(); // V
 
             int rowStride = image.getPlanes()[0].getRowStride();
-            assert(image.getPlanes()[0].getPixelStride() == 1);
+            assert (image.getPlanes()[0].getPixelStride() == 1);
 
             int pos = 0;
 
             if (rowStride == width) { // likely
                 yBuffer.get(nv21, 0, ySize);
                 pos += ySize;
-            }
-            else {
+            } else {
                 int yBufferPos = width - rowStride; // not an actual position
-                for (; pos<ySize; pos+=width) {
+                for (; pos < ySize; pos += width) {
                     yBufferPos += rowStride - width;
                     yBuffer.position(yBufferPos);
                     yBuffer.get(nv21, pos, width);
@@ -285,15 +280,15 @@ public class CameraSurfaceImpl implements CameraSurface {
             rowStride = image.getPlanes()[2].getRowStride();
             int pixelStride = image.getPlanes()[2].getPixelStride();
 
-            assert(rowStride == image.getPlanes()[1].getRowStride());
-            assert(pixelStride == image.getPlanes()[1].getPixelStride());
+            assert (rowStride == image.getPlanes()[1].getRowStride());
+            assert (pixelStride == image.getPlanes()[1].getPixelStride());
 
             if (pixelStride == 2 && rowStride == width && uBuffer.get(0) == vBuffer.get(1)) {
                 // maybe V an U planes overlap as per NV21, which means vBuffer[1] is alias of uBuffer[0]
                 byte savePixel = vBuffer.get(1);
-                vBuffer.put(1, (byte)0);
+                vBuffer.put(1, (byte) 0);
                 if (uBuffer.get(0) == 0) {
-                    vBuffer.put(1, (byte)255);
+                    vBuffer.put(1, (byte) 255);
                     if (uBuffer.get(0) == 255) {
                         vBuffer.put(1, savePixel);
                         vBuffer.get(nv21, ySize, uvSize);
@@ -309,9 +304,9 @@ public class CameraSurfaceImpl implements CameraSurface {
             // other optimizations could check if (pixelStride == 1) or (pixelStride == 2),
             // but performance gain would be less significant
 
-            for (int row=0; row<height/2; row++) {
-                for (int col=0; col<width/2; col++) {
-                    int vuPos = col*pixelStride + row*rowStride;
+            for (int row = 0; row < height / 2; row++) {
+                for (int col = 0; col < width / 2; col++) {
+                    int vuPos = col * pixelStride + row * rowStride;
                     nv21[pos++] = vBuffer.get(vuPos);
                     nv21[pos++] = uBuffer.get(vuPos);
                 }
@@ -326,7 +321,7 @@ public class CameraSurfaceImpl implements CameraSurface {
         Log.i(TAG, "surfaceCreated(): called");
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mAppContext);
-        int defaultCameraIndexId = mAppContext.getResources().getIdentifier("pref_defaultValue_cameraIndex","string", mAppContext.getPackageName());
+        int defaultCameraIndexId = mAppContext.getResources().getIdentifier("pref_defaultValue_cameraIndex", "string", mAppContext.getPackageName());
         mCamera2DeviceID = Integer.parseInt(prefs.getString("pref_cameraIndex", mAppContext.getResources().getString(defaultCameraIndexId)));
         Log.i(TAG, "surfaceCreated(): will attempt to open camera \"" + mCamera2DeviceID +
                 "\", set orientation, set preview surface");
@@ -338,8 +333,8 @@ public class CameraSurfaceImpl implements CameraSurface {
         WARNING: While coding the preferences are taken from the res/xml/preferences.xml!!!
         When building for Unity the actual used preferences are taken from the UnityARPlayer project!!!
         */
-        int defaultCameraValueId = mAppContext.getResources().getIdentifier("pref_defaultValue_cameraResolution","string",mAppContext.getPackageName());
-        String camResolution = prefs.getString("pref_cameraResolution", mAppContext.getResources(). getString(defaultCameraValueId));
+        int defaultCameraValueId = mAppContext.getResources().getIdentifier("pref_defaultValue_cameraResolution", "string", mAppContext.getPackageName());
+        String camResolution = prefs.getString("pref_cameraResolution", mAppContext.getResources().getString(defaultCameraValueId));
         String[] dims = camResolution.split("x", 2);
         if (dims.length == 2) {
             mImageReaderVideoSize = new Size(Integer.parseInt(dims[0]), Integer.parseInt(dims[1]));
@@ -351,7 +346,7 @@ public class CameraSurfaceImpl implements CameraSurface {
         // discarding all-but-the-newest Image requires temporarily acquiring two Images at once. Or more generally,
         // calling acquireLatestImage() with less than two images of margin, that is (maxImages - currentAcquiredImages < 2)
         // will not discard as expected.
-        mImageReader = ImageReader.newInstance(mImageReaderVideoSize.getWidth(),mImageReaderVideoSize.getHeight(), ImageFormat.YUV_420_888, /* The maximum number of images the user will want to access simultaneously:*/ 2 );
+        mImageReader = ImageReader.newInstance(mImageReaderVideoSize.getWidth(), mImageReaderVideoSize.getHeight(), ImageFormat.YUV_420_888, /* The maximum number of images the user will want to access simultaneously:*/ 2);
         mImageReader.setOnImageAvailableListener(mImageAvailableAndProcessHandler, null);
 
         mImageReaderCreated = true;
@@ -385,7 +380,7 @@ public class CameraSurfaceImpl implements CameraSurface {
 
     private void openCamera2(int camera2DeviceID) {
         Log.i(TAG, "openCamera2(): called");
-        CameraManager camera2DeviceMgr = (CameraManager)mAppContext.getSystemService(Context.CAMERA_SERVICE);
+        CameraManager camera2DeviceMgr = (CameraManager) mAppContext.getSystemService(Context.CAMERA_SERVICE);
         try {
             if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(mAppContext, Manifest.permission.CAMERA)) {
                 camera2DeviceMgr.openCamera(Integer.toString(camera2DeviceID), mCamera2DeviceStateCallback, null);
@@ -423,6 +418,9 @@ public class CameraSurfaceImpl implements CameraSurface {
             surfaces.add(surfaceInstance);
             mCaptureRequestBuilder.addTarget(surfaceInstance);
 
+            Log.d(TAG, "fps range : 15");
+            mCaptureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new android.util.Range<>(15, 15));
+
             mCameraDevice.createCaptureSession(
                     surfaces, // Output surfaces
                     new CameraCaptureSession.StateCallback() {
@@ -430,7 +428,13 @@ public class CameraSurfaceImpl implements CameraSurface {
                         public void onConfigured(@NonNull CameraCaptureSession session) {
                             try {
                                 if (mCameraEventListener != null) {
-                                    mCameraEventListener.cameraStreamStarted(mImageReaderVideoSize.getWidth(), mImageReaderVideoSize.getHeight(), "NV21", mCamera2DeviceID, false);
+                                    String pixelFormat = useNV21 ? "NV21" : "YUV_420_888";
+                                    mCameraEventListener.cameraStreamStarted(
+                                            mImageReaderVideoSize.getWidth(),
+                                            mImageReaderVideoSize.getHeight(),
+                                            pixelFormat,
+                                            mCamera2DeviceID,
+                                            false);
                                 }
                                 mYUV_CaptureAndSendSession = session;
                                 // Session to repeat request to update passed in camSensorSurface
