@@ -198,55 +198,6 @@ public class CameraSurfaceImpl implements CameraSurface {
             return output;
         }
 
-        private byte[] v4lconvert_vflip_yuv420(byte[] yuv, int width, int height) {
-            int x, y;
-            byte[] flipped = new byte[yuv.length];
-
-            /* First flip the Y plane */
-            for (y = 0; y < height; y++) {
-                for (x = 0; x < width; x++) {
-                    flipped[height * (height - y) + x] = yuv[height * y + x];
-                }
-            }
-
-            /* Now flip the U plane */
-            int baseU = width * height;
-            int uvHeight = height / 2;
-            int uvWidth = width / 2;
-            for (y = 0; y < uvHeight; y++) {
-                for (x = 0; x < uvWidth; x++) {
-                    flipped[baseU + uvHeight * (uvHeight - y) + x] = yuv[baseU + uvHeight * y + x];
-                }
-            }
-
-            /* Last flip the V plane */
-            int baseV = width * height + uvHeight * uvWidth;
-            for (y = 0; y < uvHeight; y++) {
-                for (x = 0; x < uvWidth; x++) {
-                    flipped[baseV + uvHeight * (uvHeight - y) + x] = yuv[baseV + uvHeight * y + x];
-                }
-            }
-
-            return flipped;
-        }
-
-        private byte[] rotateYUV420Degree180(byte[] data, int imageWidth, int imageHeight) {
-            byte[] yuv = new byte[imageWidth * imageHeight * 3 / 2];
-            int i = 0;
-            int count = 0;
-            for (i = imageWidth * imageHeight - 1; i >= 0; i--) {
-                yuv[count] = data[i];
-                count++;
-            }
-            i = imageWidth * imageHeight * 3 / 2 - 1;
-            for (i = imageWidth * imageHeight * 3 / 2 - 1; i >= imageWidth
-                    * imageHeight; i -= 2) {
-                yuv[count++] = data[i - 1];
-                yuv[count++] = data[i];
-            }
-            return yuv;
-        }
-
         private byte[] YUV_420_888toNV21(Image image) {
 
             int width = image.getWidth();
