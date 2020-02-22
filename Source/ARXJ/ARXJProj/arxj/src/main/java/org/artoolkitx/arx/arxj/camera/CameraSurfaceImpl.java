@@ -23,7 +23,6 @@ import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -145,13 +144,13 @@ public class CameraSurfaceImpl implements CameraSurface {
                 if (mCameraEventListener != null) {
                     byte[] nv21bytes = YUV_420_888toNV21(imageInstance);
                     Bitmap bitmap = nv21ToBitmap565(nv21bytes, imageInstance.getWidth(), imageInstance.getHeight());
-                    Bitmap resized = Bitmap.createScaledBitmap(bitmap, imageInstance.getWidth()/2, imageInstance.getHeight()/2, true);
+                    Bitmap resized = Bitmap.createScaledBitmap(bitmap, imageInstance.getWidth() / 2, imageInstance.getHeight() / 2, true);
+                    byte[] newNv21 = getNV21(imageInstance.getWidth() / 2, imageInstance.getHeight() / 2, resized);
 
-//                    if (useFlip) {
-//                        goal = rotateNV21_working(goal, imageInstance.getWidth(), imageInstance.getHeight(), 180);
-//                    }
+                    if (useFlip) {
+                        newNv21 = rotateNV21_working(newNv21, imageInstance.getWidth() / 2, imageInstance.getHeight() / 2, 180);
+                    }
 
-                    byte[] newNv21 = getNV21(imageInstance.getWidth()/2, imageInstance.getHeight()/2, resized);
                     mCameraEventListener.cameraStreamFrame(newNv21, newNv21.length);
                 }
             } else {
@@ -403,8 +402,8 @@ public class CameraSurfaceImpl implements CameraSurface {
                                 if (mCameraEventListener != null) {
                                     String pixelFormat = useNV21 ? "NV21" : "YUV_420_888";
                                     mCameraEventListener.cameraStreamStarted(
-                                            mImageReaderVideoSize.getWidth()/2,
-                                            mImageReaderVideoSize.getHeight()/2,
+                                            useNV21 ? mImageReaderVideoSize.getWidth() / 2 : mImageReaderVideoSize.getWidth(),
+                                            useNV21 ? mImageReaderVideoSize.getHeight() / 2 : mImageReaderVideoSize.getHeight(),
                                             pixelFormat,
                                             mCamera2DeviceID,
                                             false);
@@ -468,14 +467,13 @@ public class CameraSurfaceImpl implements CameraSurface {
     }
 
 
+    byte[] getNV21(int inputWidth, int inputHeight, Bitmap scaled) {
 
-    byte [] getNV21(int inputWidth, int inputHeight, Bitmap scaled) {
-
-        int [] argb = new int[inputWidth * inputHeight];
+        int[] argb = new int[inputWidth * inputHeight];
 
         scaled.getPixels(argb, 0, inputWidth, 0, 0, inputWidth, inputHeight);
 
-        byte [] yuv = new byte[inputWidth*inputHeight*3/2];
+        byte[] yuv = new byte[inputWidth * inputHeight * 3 / 2];
         encodeYUV420SP(yuv, argb, inputWidth, inputHeight);
 
         scaled.recycle();
@@ -500,20 +498,20 @@ public class CameraSurfaceImpl implements CameraSurface {
                 B = (argb[index] & 0xff) >> 0;
 
                 // well known RGB to YUV algorithm
-                Y = ( (  66 * R + 129 * G +  25 * B + 128) >> 8) +  16;
-                U = ( ( -38 * R -  74 * G + 112 * B + 128) >> 8) + 128;
-                V = ( ( 112 * R -  94 * G -  18 * B + 128) >> 8) + 128;
+                Y = ((66 * R + 129 * G + 25 * B + 128) >> 8) + 16;
+                U = ((-38 * R - 74 * G + 112 * B + 128) >> 8) + 128;
+                V = ((112 * R - 94 * G - 18 * B + 128) >> 8) + 128;
 
                 // NV21 has a plane of Y and interleaved planes of VU each sampled by a factor of 2
                 //    meaning for every 4 Y pixels there are 1 V and 1 U.  Note the sampling is every other
                 //    pixel AND every other scanline.
                 yuv420sp[yIndex++] = (byte) ((Y < 0) ? 0 : ((Y > 255) ? 255 : Y));
                 if (j % 2 == 0 && index % 2 == 0) {
-                    yuv420sp[uvIndex++] = (byte)((V<0) ? 0 : ((V > 255) ? 255 : V));
-                    yuv420sp[uvIndex++] = (byte)((U<0) ? 0 : ((U > 255) ? 255 : U));
+                    yuv420sp[uvIndex++] = (byte) ((V < 0) ? 0 : ((V > 255) ? 255 : V));
+                    yuv420sp[uvIndex++] = (byte) ((U < 0) ? 0 : ((U > 255) ? 255 : U));
                 }
 
-                index ++;
+                index++;
             }
         }
     }

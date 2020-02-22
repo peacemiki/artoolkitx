@@ -161,7 +161,7 @@ long ARTracker2d::update(AR2VideoBufferT *buff, std::vector<ARTrackable *>& trac
     end = now_ms();
     result = (long)(end - start);
 
-    ARLOGi("analyse time : %ld.\n", result);
+//    ARLOGi("analyse time : %ld.\n", result);
 
     // Loop through all loaded 2D targets and match against tracking results.
     m_2DTrackerDetectedImageCount = 0;
@@ -184,6 +184,7 @@ long ARTracker2d::update(AR2VideoBufferT *buff, std::vector<ARTrackable *>& trac
             }
         }
     }
+
     return result;
 }
 

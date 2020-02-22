@@ -2,7 +2,6 @@ package org.artoolkitx.arx.arxj.camera;
 
 import android.app.Activity;
 import android.util.Log;
-import android.widget.Toast;
 
 import org.artoolkitx.arx.arxj.ARController;
 
@@ -84,7 +83,6 @@ public class CameraEventListenerImpl implements CameraEventListener {
 
         long start = System.currentTimeMillis();
         long analyseTime = ARController.getInstance().convertAndDetect1(frame, frameSize);
-        Log.i(TAG, "analyseTime1 : " + analyseTime);
         if (analyseTime > -1) {
             long total = System.currentTimeMillis() - start;
             frameListener.onFrameProcessed(total, analyseTime);
@@ -100,7 +98,6 @@ public class CameraEventListenerImpl implements CameraEventListener {
 
         long start = System.currentTimeMillis();
         long analyseTime = ARController.getInstance().convertAndDetect2(framePlanes, framePlanePixelStrides, framePlaneRowStrides);
-        Log.i(TAG, "analyseTime2 : " + analyseTime);
         if (analyseTime > -1) {
             long total = System.currentTimeMillis() - start;
             frameListener.onFrameProcessed(total, analyseTime);
