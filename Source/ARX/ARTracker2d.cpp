@@ -152,6 +152,7 @@ long ARTracker2d::update(AR2VideoBufferT *buff, std::vector<ARTrackable *>& trac
             ARLOGe("Error loading 2D image tracker data.\n");
             return -1;
         }
+        return -1;
     }
 
     double start, end;
