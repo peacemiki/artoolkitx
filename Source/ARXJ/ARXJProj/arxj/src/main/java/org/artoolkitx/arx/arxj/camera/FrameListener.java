@@ -41,5 +41,5 @@ package org.artoolkitx.arx.arxj.camera;
 public interface FrameListener {
     void firstFrame(int cameraIndex);
 
-    void onFrameProcessed(long matchingTimeInMills, long analyseTimeInMills);
+    void onFrameProcessed(long matchingTime, long analyseTime);
 }

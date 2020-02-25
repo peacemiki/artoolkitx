@@ -100,7 +100,7 @@ private:
     bool m_running;
     bool unloadTwoDData();
     bool loadTwoDData(std::vector<ARTrackable *>& trackables);
-    double now_ms();
+    long now_ms();
 };
 
 #endif // HAVE_2D

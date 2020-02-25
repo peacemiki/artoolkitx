@@ -155,12 +155,12 @@ long ARTracker2d::update(AR2VideoBufferT *buff, std::vector<ARTrackable *>& trac
         return -1;
     }
 
-    double start, end;
+    long start, end;
     long result;
     start = now_ms();
     m_2DTracker->ProcessFrameData(buff->buff);
     end = now_ms();
-    result = (long)(end - start);
+    result = end - start;
 
 //    ARLOGi("analyse time : %ld.\n", result);
 
@@ -189,11 +189,11 @@ long ARTracker2d::update(AR2VideoBufferT *buff, std::vector<ARTrackable *>& trac
     return result;
 }
 
-double ARTracker2d::now_ms() {
+long ARTracker2d::now_ms() {
 
     struct timespec res;
     clock_gettime(CLOCK_REALTIME, &res);
-    return 1000.0 * res.tv_sec + (double) res.tv_nsec / 1e6;
+    return res.tv_nsec;
 
 }
 

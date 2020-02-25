@@ -6,7 +6,6 @@ import android.util.Log;
 import org.artoolkitx.arx.arxj.ARController;
 
 import java.nio.ByteBuffer;
-import java.util.concurrent.TimeUnit;
 
 /*
  *  CameraEventListenerImpl.java
@@ -97,11 +96,11 @@ public class CameraEventListenerImpl implements CameraEventListener {
             firstUpdate = false;
         }
 
-        long start = System.currentTimeMillis();
-        long analyseTimeInMills = ARController.getInstance().convertAndDetect2(framePlanes, framePlanePixelStrides, framePlaneRowStrides);
-        if (analyseTimeInMills > 0) {
-            long matchingTimeInMills = (System.currentTimeMillis() - start) - analyseTimeInMills;
-            frameListener.onFrameProcessed(matchingTimeInMills, analyseTimeInMills);
+        long start = System.nanoTime();
+        long analyseTime = ARController.getInstance().convertAndDetect2(framePlanes, framePlanePixelStrides, framePlaneRowStrides);
+        if (analyseTime > 0) {
+            long matchingTime = (System.nanoTime() - start) - analyseTime;
+            frameListener.onFrameProcessed(matchingTime, analyseTime);
         }
     }
 
