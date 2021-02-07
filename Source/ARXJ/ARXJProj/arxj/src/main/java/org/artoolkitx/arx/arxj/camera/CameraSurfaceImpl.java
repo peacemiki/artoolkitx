@@ -17,6 +17,8 @@ import android.hardware.camera2.CaptureRequest;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Size;
@@ -70,13 +72,14 @@ import java.util.List;
 public class CameraSurfaceImpl implements CameraSurface {
 
     public static boolean swap;
-    public static boolean xflip;
-    public static boolean yflip;
+    public static boolean xFlip;
+    public static boolean yFlip;
 
     public static boolean useNV21 = false;
     public static boolean useFlip = false;
 
-    public static long sampling = 1;
+    public static int lowerFps = 10;
+    public static int upperFps = 15;
 
     /**
      * Android logging tag for this class.
@@ -87,7 +90,7 @@ public class CameraSurfaceImpl implements CameraSurface {
     private Size mImageReaderVideoSize;
     private final Context mAppContext;
 
-    private long frameCount = 0;
+    private HandlerThread handlerThread = new HandlerThread("artoolkitx");
 
     private final CameraDevice.StateCallback mCamera2DeviceStateCallback = new CameraDevice.StateCallback() {
         @Override
@@ -121,8 +124,7 @@ public class CameraSurfaceImpl implements CameraSurface {
     public CameraSurfaceImpl(CameraEventListener cameraEventListener, Context appContext) {
         this.mCameraEventListener = cameraEventListener;
         this.mAppContext = appContext;
-        this.frameCount = 0;
-
+        this.handlerThread.start();
     }
 
     private Bitmap nv21ToBitmap565(byte[] nv21bytearray, int width, int height) {
@@ -143,9 +145,6 @@ public class CameraSurfaceImpl implements CameraSurface {
     private final ImageReader.OnImageAvailableListener mImageAvailableAndProcessHandler = new ImageReader.OnImageAvailableListener() {
         @Override
         public void onImageAvailable(ImageReader reader) {
-
-            if (frameCount % sampling > 0) return;
-
             Image imageInstance = reader.acquireLatestImage();
             if (imageInstance == null || mImageReader == null) {
                 //Note: This seems to happen quite often.
@@ -217,8 +216,8 @@ public class CameraSurfaceImpl implements CameraSurface {
                     final int hOut = swap ? width : height;
                     final int iSwapped = swap ? j : i;
                     final int jSwapped = swap ? i : j;
-                    final int iOut = xflip ? wOut - iSwapped - 1 : iSwapped;
-                    final int jOut = yflip ? hOut - jSwapped - 1 : jSwapped;
+                    final int iOut = xFlip ? wOut - iSwapped - 1 : iSwapped;
+                    final int jOut = yFlip ? hOut - jSwapped - 1 : jSwapped;
 
                     final int yOut = jOut * wOut + iOut;
                     final int uOut = frameSize + (jOut >> 1) * wOut + (iOut & ~1);
@@ -332,7 +331,7 @@ public class CameraSurfaceImpl implements CameraSurface {
         // calling acquireLatestImage() with less than two images of margin, that is (maxImages - currentAcquiredImages < 2)
         // will not discard as expected.
         mImageReader = ImageReader.newInstance(mImageReaderVideoSize.getWidth(), mImageReaderVideoSize.getHeight(), ImageFormat.YUV_420_888, /* The maximum number of images the user will want to access simultaneously:*/ 2);
-        mImageReader.setOnImageAvailableListener(mImageAvailableAndProcessHandler, null);
+        mImageReader.setOnImageAvailableListener(mImageAvailableAndProcessHandler, new Handler(handlerThread.getLooper()));
 
         mImageReaderCreated = true;
 
@@ -403,8 +402,7 @@ public class CameraSurfaceImpl implements CameraSurface {
             surfaces.add(surfaceInstance);
             mCaptureRequestBuilder.addTarget(surfaceInstance);
 
-            Log.d(TAG, "fps range : 15");
-            mCaptureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new android.util.Range<>(15, 15));
+            mCaptureRequestBuilder.set(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE, new android.util.Range<>(lowerFps, upperFps));
 
             mCameraDevice.createCaptureSession(
                     surfaces, // Output surfaces
@@ -457,6 +455,7 @@ public class CameraSurfaceImpl implements CameraSurface {
             mCameraEventListener.cameraStreamStopped();
         }
         mImageReaderCreated = false;
+        handlerThread.quitSafely();
     }
 
     private void closeYUV_CaptureAndForwardSession() {
