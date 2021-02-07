@@ -16,12 +16,14 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
 import android.media.Image;
 import android.media.ImageReader;
+import android.os.Build;
 import android.preference.PreferenceManager;
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import android.util.Log;
 import android.util.Size;
 import android.view.Surface;
+
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -74,6 +76,8 @@ public class CameraSurfaceImpl implements CameraSurface {
     public static boolean useNV21 = false;
     public static boolean useFlip = false;
 
+    public static long sampling = 1;
+
     /**
      * Android logging tag for this class.
      */
@@ -82,6 +86,8 @@ public class CameraSurfaceImpl implements CameraSurface {
     private ImageReader mImageReader;
     private Size mImageReaderVideoSize;
     private final Context mAppContext;
+
+    private long frameCount = 0;
 
     private final CameraDevice.StateCallback mCamera2DeviceStateCallback = new CameraDevice.StateCallback() {
         @Override
@@ -115,6 +121,7 @@ public class CameraSurfaceImpl implements CameraSurface {
     public CameraSurfaceImpl(CameraEventListener cameraEventListener, Context appContext) {
         this.mCameraEventListener = cameraEventListener;
         this.mAppContext = appContext;
+        this.frameCount = 0;
 
     }
 
@@ -124,7 +131,11 @@ public class CameraSurfaceImpl implements CameraSurface {
         yuvImage.compressToJpeg(new Rect(0, 0, width, height), 100, os);
         byte[] jpegByteArray = os.toByteArray();
         BitmapFactory.Options options = new BitmapFactory.Options();
-        options.outConfig = Bitmap.Config.RGB_565;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            options.outConfig = Bitmap.Config.RGB_565;
+        } else {
+            options.inPreferredConfig = Bitmap.Config.RGB_565;
+        }
         return BitmapFactory.decodeByteArray(jpegByteArray, 0, jpegByteArray.length, options);
     }
 
@@ -132,6 +143,8 @@ public class CameraSurfaceImpl implements CameraSurface {
     private final ImageReader.OnImageAvailableListener mImageAvailableAndProcessHandler = new ImageReader.OnImageAvailableListener() {
         @Override
         public void onImageAvailable(ImageReader reader) {
+
+            if (frameCount % sampling > 0) return;
 
             Image imageInstance = reader.acquireLatestImage();
             if (imageInstance == null || mImageReader == null) {
