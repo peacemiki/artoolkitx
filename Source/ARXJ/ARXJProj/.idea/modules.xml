@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ARXJProj.iml" filepath="$PROJECT_DIR$/ARXJProj.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/arxj/ARXJProj.arxj.iml" filepath="$PROJECT_DIR$/.idea/modules/arxj/ARXJProj.arxj.iml" />
-      <module fileurl="file://$PROJECT_DIR$/arxj/arxj.iml" filepath="$PROJECT_DIR$/arxj/arxj.iml" />
     </modules>
   </component>
 </project>

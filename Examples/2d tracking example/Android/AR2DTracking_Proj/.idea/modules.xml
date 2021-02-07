@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AR2DTrackingExample/AR2DTrackingExample.iml" filepath="$PROJECT_DIR$/AR2DTrackingExample/AR2DTrackingExample.iml" />
       <module fileurl="file://$PROJECT_DIR$/AR2DTracking_Proj.iml" filepath="$PROJECT_DIR$/AR2DTracking_Proj.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/AR2DTrackingExample/AR2DTracking_Proj.AR2DTrackingExample.iml" filepath="$PROJECT_DIR$/.idea/modules/AR2DTrackingExample/AR2DTracking_Proj.AR2DTrackingExample.iml" />
     </modules>
   </component>
 </project>
